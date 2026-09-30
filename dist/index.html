@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accenture Online Assessment (OA) Simulation Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23a100ff%22>&gt;</text></svg>">
+  <script type="module" crossorigin src="/assets/index-DaEWCQD2.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CGgNwvWz.css">
+</head>
+<body>
+
+  <!-- Diagonal Proctoring Watermark (Randomized Proctoring ID) -->
+  <div class="watermark-overlay" aria-hidden="true">
+    <div class="watermark-pattern" id="watermark-container">
+      <!-- Dynamically generated random watermark tokens -->
+    </div>
+  </div>
+
+  <!-- Top Navigation & Proctoring Header -->
+  <header class="exam-header">
+    <div class="header-left">
+      <div class="brand-badge">
+        <span class="accenture-arrow">&gt;</span>
+        <span>accenture</span>
+      </div>
+      <div class="candidate-badge" title="Click to randomize Roll Number / Watermark" id="candidate-badge-btn" style="cursor:pointer;">
+        <span>Roll:</span>
+        <strong id="candidate-roll-val">--</strong>
+        <span style="font-size:10px; opacity:0.6;">⟳</span>
+      </div>
+      <div class="exam-title-badge" id="header-exam-title">
+        Campus Hiring - Technical &amp; Coding 2025 - Assessment Slot 1
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="paper-selector-wrap">
+        <span class="paper-selector-label">Test Paper:</span>
+        <select class="paper-dropdown" id="select-paper">
+          <option value="paper1" selected>Paper 1: Accenture OA 2025 (Official Exam from PDF)</option>
+          <option value="paper2">Paper 2: Slot 2 (Cloud Architecture &amp; Data Structures)</option>
+          <option value="paper3">Paper 3: Slot 3 (Cyber Defense &amp; Optimization)</option>
+          <option value="paper4">Paper 4: Slot 4 (Distributed Systems &amp; Full-Stack)</option>
+          <option value="paper5">Paper 5: Slot 5 (DevOps &amp; Database Tuning)</option>
+        </select>
+      </div>
+      <button class="btn-secondary" id="btn-stage-guide" style="font-size:11.5px; padding:4px 10px; background:rgba(255,255,255,0.08); color:#e2e8f0; border-color:rgba(255,255,255,0.2);">
+        📖 Stage 2 &amp; 3 Prep Guide
+      </button>
+    </div>
+
+    <div class="header-right">
+      <div class="save-indicator">
+        <span class="pulse-dot"></span>
+        <span id="save-time-label">Saved: 0 seconds ago</span>
+      </div>
+
+      <div class="timer-box">
+        <span class="timer-icon">⏱</span>
+        <span class="timer-label">Test Time:</span>
+        <span class="timer-val" id="header-timer-val">44:57</span>
+      </div>
+
+      <button class="btn-finish-test" id="btn-finish-test">
+        Finish Test
+      </button>
+    </div>
+  </header>
+
+  <!-- Section Switcher Navbar -->
+  <nav class="exam-navbar">
+    <div class="section-tabs">
+      <button class="section-tab" data-section="sec_a">
+        <span>Section A: Behavioral &amp; Cognitive</span>
+        <span class="tab-badge">Eliminatory</span>
+      </button>
+      <button class="section-tab active" data-section="sec_b">
+        <span>Section B: Technical Assessment</span>
+        <span class="tab-badge">45 Qs | 45 Mins</span>
+      </button>
+      <button class="section-tab" data-section="sec_c">
+        <span>Section C: Coding &amp; Full-Stack</span>
+        <span class="tab-badge">3 Qs | 60 Mins</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Technical Assessment Subsection Filter Pills -->
+  <div class="subsection-bar" id="subsection-bar-container"></div>
+
+  <!-- Dynamic Question / Assessment Mount Point -->
+  <main id="exam-main-container" class="exam-main"></main>
+
+  <!-- Bottom Support Helpdesk Footer -->
+  <footer class="exam-footer">
+    <div class="footer-contact">
+      <span>Need Help? Contact us (Please add country code while dialing)</span>
+      <span class="footer-phone">+91 63665-24235</span>
+    </div>
+    <div class="footer-version" id="footer-candidate-info">
+      Secure Exam Browser 1.6.8 • Candidate ID: <span id="footer-candidate-id">--</span>
+    </div>
+  </footer>
+
+  <!-- Scorecard / Results Modal -->
+  <div class="modal-overlay" id="modal-scorecard">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Assessment Evaluation &amp; Shortlist Status</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="scorecard-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Stage 2 & 3 Comprehensive Guide Modal -->
+  <div class="modal-overlay" id="modal-stage-guide">
+    <div class="modal-card" style="max-width:850px;">
+      <div class="modal-header">
+        <div class="modal-title">Accenture Complete Recruitment Roadmap (Stages 1, 2 &amp; 3)</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="line-height:1.6; font-size:14px; color:#334155;">
+        <div style="background:#ede9fe; padding:14px 18px; border-radius:8px; border-left:4px solid #a100ff; margin-bottom:20px;">
+          <h3 style="color:#6b21a8; font-size:16px;">Stage 1: Online Assessment (OA) - Current Simulator</h3>
+          <p style="font-size:13px; color:#475569; margin-top:4px;">
+            • <strong>Section A (Eliminatory):</strong> Gamified Cognitive Challenge + ~50 Behavioral MCQs.<br/>
+            • <strong>Section B:</strong> 45 Technical MCQs in 45 Minutes (Pseudocode, Cloud, Networks, Security, MS Excel).<br/>
+            • <strong>Section C:</strong> 3 Coding Questions in 60 Minutes (Frontend DOM/CSS, SQL Multi-table JOINs, Backend DSA).
+          </p>
+        </div>
+
+        <div style="background:#f0fdf4; padding:14px 18px; border-radius:8px; border-left:4px solid #16a34a; margin-bottom:20px;">
+          <h3 style="color:#15803d; font-size:16px;">Stage 2: Communication Assessment (Automated AI Voice Evaluation)</h3>
+          <p style="font-size:13px; color:#475569; margin-top:4px;">
+            Evaluates spoken English fluency, pronunciation, grammar, and listening comprehension:
+          </p>
+          <ul style="padding-left:20px; font-size:13px; margin-top:6px; color:#334155;">
+            <li><strong>Reading Aloud:</strong> Read displayed corporate sentences clearly with natural cadence.</li>
+            <li><strong>Listening &amp; Repeating:</strong> Listen to audio sentences once and repeat them back verbatim.</li>
+            <li><strong>Vocabulary:</strong> Give one-word synonyms or complete short phrases based on audio cues.</li>
+            <li><strong>Grammar Questions:</strong> Rearrange scrambled sentences or identify correct preposition/verb tenses.</li>
+            <li><strong>Spoken Communication (Extempore):</strong> 1-minute impromptu speech on a workplace or general prompt (e.g. <em>"Should companies allow permanent hybrid work?"</em>).</li>
+          </ul>
+        </div>
+
+        <div style="background:#eff6ff; padding:14px 18px; border-radius:8px; border-left:4px solid #2563eb; margin-bottom:20px;">
+          <h3 style="color:#1d4ed8; font-size:16px;">Stage 3: Technical + HR Interview (30–45 Minutes)</h3>
+          <ul style="padding-left:20px; font-size:13px; margin-top:6px; color:#334155;">
+            <li><strong>Project Deep Dive:</strong> Architecture diagram, tech stack selection rationale, database schema design, and API endpoints.</li>
+            <li><strong>Coding &amp; Core Concepts:</strong> OOPs principles, SQL indexing &amp; normalization, RESTful standards, cloud deployment models.</li>
+            <li><strong>Situational &amp; HR Questions:</strong> How you resolved team conflicts, handling deadline pressures, aligning with Accenture core values.</li>
+          </ul>
+        </div>
+
+        <div style="text-align:right;">
+          <button class="btn-primary btn-modal-dismiss" style="padding:8px 20px;">Close Roadmap Guide</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
