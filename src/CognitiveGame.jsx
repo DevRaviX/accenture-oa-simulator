@@ -293,6 +293,7 @@ export default function CognitiveGame({ onComplete }) {
   const [animToken, setAnimToken] = useState(null);
   const [modal, setModal] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [toast, setToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(4 * 60);
 
   /* countdown timer */
@@ -323,14 +324,14 @@ export default function CognitiveGame({ onComplete }) {
       }
 
       if (nextR < 0 || nextR >= GRID_SIZE || nextC < 0 || nextC >= GRID_SIZE) {
-        alert("Token fell off the grid — path is broken!");
+        setToast("Token fell off the grid — path is broken!");
         setAnimToken(null);
         return;
       }
 
       const outDir = getOutput(grid[nextR][nextC], dir);
       if (outDir === null) {
-        alert("Invalid path or wrong arrow direction!");
+        setToast("Invalid path or wrong arrow direction!");
         setAnimToken(null);
         return;
       }
@@ -341,6 +342,13 @@ export default function CognitiveGame({ onComplete }) {
     const t = setTimeout(step, 350);
     return () => clearTimeout(t);
   }, [animToken, grid, levelData.endRow]);
+
+  /* auto-dismiss toast */
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   /* actions */
   const rotateSelected = useCallback(() => {
@@ -382,6 +390,7 @@ export default function CognitiveGame({ onComplete }) {
       setSelectedCell(null);
       setModal(false);
       setTimeUp(false);
+      setToast(null);
       setTimeLeft(4 * 60);
     } else {
       if (onComplete) onComplete();
@@ -568,6 +577,19 @@ export default function CognitiveGame({ onComplete }) {
           </div>
         </div>
       </div>
+
+      {/* ── In-page toast notification ── */}
+      {toast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[320px]">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span className="font-semibold text-sm">{toast}</span>
+            <button onClick={() => setToast(null)} className="ml-auto text-white/70 hover:text-white text-lg font-bold">✕</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
