@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CognitiveGame from './CognitiveGame.jsx';
 import { papers } from '../js/data/index.js'; 
 
@@ -7,27 +7,32 @@ function App() {
   const [sessionToken, setSessionToken] = useState('');
   const [currentSection, setCurrentSection] = useState('sec_a');
 
-  const generateWatermark = () => {
+  const generateWatermark = useCallback(() => {
     setCandidateRoll('24' + Math.floor(100000 + Math.random() * 900000));
     setSessionToken(Math.floor(10000000 + Math.random() * 90000000).toString());
-  };
+  }, []);
 
   useEffect(() => {
     generateWatermark();
-  }, []);
+  }, [generateWatermark]);
 
   const watermarkText = `${candidateRoll} - ${sessionToken}`;
+
+  // Memoize the 150 spans so they aren't recreated on every state change (e.g., tab switch)
+  const watermarkPattern = useMemo(() => {
+    return Array.from({ length: 150 }).map((_, i) => (
+      <span key={i} className="text-3xl font-bold whitespace-nowrap text-gray-500">
+        {watermarkText}
+      </span>
+    ));
+  }, [watermarkText]);
 
   return (
     <div className="relative min-h-screen bg-gray-100 flex flex-col font-sans overflow-hidden">
       
       {/* Background Watermark Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-5 z-0 flex flex-wrap gap-x-24 gap-y-12 items-center justify-center transform -rotate-12 scale-150">
-        {Array.from({ length: 150 }).map((_, i) => (
-          <span key={i} className="text-3xl font-bold whitespace-nowrap text-gray-500">
-            {watermarkText}
-          </span>
-        ))}
+        {watermarkPattern}
       </div>
 
       {/* Header */}
