@@ -16,14 +16,12 @@ function getOutput(tile, dir) {
   const { type, rotation, reversed } = tile;
 
   if (type === "straight") {
-    const axis = rotation % 180 === 0 ? "h" : "v";
-    if (axis === "h") {
-      if (!reversed && dir === 0) return 0;
-      if (reversed && dir === 180) return 180;
-    } else {
-      if (!reversed && dir === 90) return 90;
-      if (reversed && dir === 270) return 270;
-    }
+    // The base SVG draws →→→ (dir=0) for !reversed, ←←← (dir=180) for reversed.
+    // CSS rotation rotates the visual arrows, so the accepted direction rotates too.
+    const acceptDir = reversed
+      ? (180 + rotation) % 360
+      : (0 + rotation) % 360;
+    if (dir === acceptDir) return acceptDir;
   }
 
   if (type === "corner") {
@@ -39,12 +37,19 @@ function getOutput(tile, dir) {
   }
 
   if (type === "cross") {
+    // Base SVG: !reversed accepts dir=0 (→) and dir=90 (↓)
+    //           reversed accepts dir=180 (←) and dir=270 (↑)
+    // CSS rotation rotates these accepted directions.
     if (!reversed) {
-      if (dir === 0) return 0;
-      if (dir === 90) return 90;
+      const d1 = (0 + rotation) % 360;
+      const d2 = (90 + rotation) % 360;
+      if (dir === d1) return d1;
+      if (dir === d2) return d2;
     } else {
-      if (dir === 180) return 180;
-      if (dir === 270) return 270;
+      const d1 = (180 + rotation) % 360;
+      const d2 = (270 + rotation) % 360;
+      if (dir === d1) return d1;
+      if (dir === d2) return d2;
     }
   }
 
@@ -258,18 +263,18 @@ const Tile = memo(({ cell }) => {
         <rect x="32" y="0" width="36" height="100" fill={TILE_BG} />
         {cell.reversed ? (
           <>
-            {/* ← and ↑ */}
-            <path d="M 82,50 L 55,50 M 65,42 L 55,50 L 65,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 18,50 L 45,50 M 35,42 L 45,50 L 35,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 50,82 L 50,55 M 42,65 L 50,55 L 58,65" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 50,18 L 50,45 M 42,35 L 50,45 L 58,35" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            {/* ←← on horizontal arm, ↑↑ on vertical arm */}
+            <path d="M 82,50 L 58,50 M 68,42 L 58,50 L 68,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 45,50 L 18,50 M 28,42 L 18,50 L 28,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 50,82 L 50,58 M 42,68 L 50,58 L 58,68" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 50,45 L 50,18 M 42,28 L 50,18 L 58,28" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </>
         ) : (
           <>
-            {/* → and ↓ */}
-            <path d="M 18,50 L 45,50 M 35,42 L 45,50 L 35,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 55,50 L 82,50 M 75,42 L 83,50 L 75,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 50,18 L 50,45 M 42,35 L 50,45 L 58,35" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            {/* →→ on horizontal arm, ↓↓ on vertical arm */}
+            <path d="M 18,50 L 42,50 M 32,42 L 42,50 L 32,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 55,50 L 82,50 M 72,42 L 82,50 L 72,58" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 50,18 L 50,42 M 42,32 L 50,42 L 58,32" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M 50,55 L 50,82 M 42,72 L 50,82 L 58,72" stroke={ARROW_COLOR} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </>
         )}
