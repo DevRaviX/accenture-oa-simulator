@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CognitiveGame from './CognitiveGame.jsx';
+import SectionB from './SectionB.jsx';
+import SectionC from './SectionC.jsx';
 import { papers } from '../js/data/index.js'; 
 
 function App() {
@@ -90,10 +92,10 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col relative z-10 w-full max-w-[100vw] overflow-y-auto">
+      <main className="flex-1 flex flex-col relative z-10 w-full max-w-[100vw] overflow-hidden">
         {currentSection === 'sec_a' && <CognitiveGame onComplete={() => setCurrentSection('sec_b')} />}
-        {currentSection === 'sec_b' && <div className="p-8 text-center text-gray-500">Section B Placeholder</div>}
-        {currentSection === 'sec_c' && <div className="p-8 text-center text-gray-500">Section C Placeholder</div>}
+        {currentSection === 'sec_b' && <SectionB onComplete={() => setCurrentSection('sec_c')} />}
+        {currentSection === 'sec_c' && <SectionC onComplete={() => alert('All Sections Complete!')} />}
       </main>
 
       {/* Footer */}
