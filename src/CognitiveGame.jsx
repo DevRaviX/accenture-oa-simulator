@@ -292,11 +292,17 @@ export default function CognitiveGame({ onComplete }) {
   const [selectedCell, setSelectedCell] = useState(null);
   const [animToken, setAnimToken] = useState(null);
   const [modal, setModal] = useState(false);
+  const [timeUp, setTimeUp] = useState(false);
   const [timeLeft, setTimeLeft] = useState(4 * 60);
 
   /* countdown timer */
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (timeLeft <= 0) {
+      setTimeUp(true);
+      setAnimToken(null);
+      setSelectedCell(null);
+      return;
+    }
     const id = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(id);
   }, [timeLeft]);
@@ -338,7 +344,7 @@ export default function CognitiveGame({ onComplete }) {
 
   /* actions */
   const rotateSelected = useCallback(() => {
-    if (!selectedCell || animToken) return;
+    if (!selectedCell || animToken || timeLeft <= 0) return;
     const { r, c } = selectedCell;
     const cell = grid[r][c];
     if (cell.type === "empty") return;
@@ -350,7 +356,7 @@ export default function CognitiveGame({ onComplete }) {
   }, [selectedCell, grid, animToken]);
 
   const reverseSelected = useCallback(() => {
-    if (!selectedCell || animToken) return;
+    if (!selectedCell || animToken || timeLeft <= 0) return;
     const { r, c } = selectedCell;
     const cell = grid[r][c];
     if (cell.type === "empty") return;
@@ -362,9 +368,9 @@ export default function CognitiveGame({ onComplete }) {
   }, [selectedCell, grid, animToken]);
 
   const validatePath = useCallback(() => {
-    if (animToken) return;
+    if (animToken || timeLeft <= 0) return;
     setAnimToken({ r: levelData.startRow, c: -1, dir: 0 });
-  }, [animToken, levelData.startRow]);
+  }, [animToken, levelData.startRow, timeLeft]);
 
   const nextLevel = () => {
     if (currentLevel < TOTAL_LEVELS - 1) {
@@ -375,6 +381,8 @@ export default function CognitiveGame({ onComplete }) {
       setAnimToken(null);
       setSelectedCell(null);
       setModal(false);
+      setTimeUp(false);
+      setTimeLeft(4 * 60);
     } else {
       if (onComplete) onComplete();
     }
@@ -418,6 +426,7 @@ export default function CognitiveGame({ onComplete }) {
                   key={`${r}-${c}`}
                   onClick={() =>
                     !animToken &&
+                    !timeUp &&
                     cell.type !== "empty" &&
                     setSelectedCell({ r, c })
                   }
@@ -501,13 +510,34 @@ export default function CognitiveGame({ onComplete }) {
               </div>
             </div>
           )}
+
+          {/* Time's up modal */}
+          {timeUp && !modal && (
+            <div className="absolute inset-0 bg-red-900/70 z-30 flex items-center justify-center backdrop-blur-sm">
+              <div className="bg-white p-8 rounded-xl flex flex-col items-center shadow-2xl">
+                <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Time's Up!
+                </h2>
+                <p className="text-gray-500 mb-6 text-center">You ran out of time for this question.</p>
+                <button
+                  onClick={nextLevel}
+                  className="bg-red-600 text-white px-8 py-3 rounded font-bold hover:bg-red-700 shadow-md"
+                >
+                  {currentLevel < TOTAL_LEVELS - 1 ? "NEXT QUESTION" : "FINISH"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Control panel ── */}
         <div className="flex items-center justify-center gap-8 mt-10">
           {/* Circular timer */}
-          <div className="w-[76px] h-[76px] rounded-full border-[5px] border-[#3a3a3a] flex items-center justify-center">
-            <span className="text-[22px] font-bold text-[#3a3a3a] tabular-nums">
+          <div className={`w-[76px] h-[76px] rounded-full border-[5px] flex items-center justify-center transition-colors ${timeLeft <= 30 ? 'border-red-500' : 'border-[#3a3a3a]'}`}>
+            <span className={`text-[22px] font-bold tabular-nums transition-colors ${timeLeft <= 30 ? 'text-red-500' : 'text-[#3a3a3a]'}`}>
               {fmt(timeLeft)}
             </span>
           </div>
