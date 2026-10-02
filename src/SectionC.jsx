@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Code, Database, Layout, Play, Send } from 'lucide-react';
+import { Clock, Code, Database, Layout, Play, Send, CheckCircle } from 'lucide-react';
+import { formatTime } from './utils.js';
+import { papers } from '../js/data/index.js';
+import { actualSectionC } from './actualData.js';
 
 const DURATION_SECONDS = 60 * 60; // 60 mins
 
-const CODING_PROBLEMS = {
-  frontend: {
-    title: 'Frontend: Accessible Login Form',
-    desc: 'Using HTML, CSS, and JavaScript, create a responsive and accessible login form. Ensure semantic tags are used and it handles basic validation.',
-    initialCode: '<!-- Write your HTML/CSS/JS here -->\n<div class="login-container">\n  \n</div>',
-    language: 'HTML/JS'
-  },
-  dsa: {
-    title: 'Backend/DSA: Array Manipulation',
-    desc: 'Given an array of integers, write a function to find the maximum contiguous subarray sum. Return the sum.',
-    initialCode: 'function maxSubArray(nums) {\n  // Write your code here\n  return 0;\n}',
-    language: 'JavaScript'
-  },
-  sql: {
-    title: 'Database: Sales Aggregation',
-    desc: 'Write an SQL query using JOINs to find the total sales amount per region from the `orders` and `regions` tables.',
-    initialCode: '-- Write your SQL query here\nSELECT * FROM orders;',
-    language: 'SQL'
-  }
-};
+export default function SectionC({ onComplete, paperType }) {
+  const qList = paperType === 'actual' ? actualSectionC : papers.paper1.sectionC.questions;
+  
+  const CODING_PROBLEMS = {
+    frontend: {
+      title: qList[0]?.title || 'Frontend Challenge',
+      desc: qList[0]?.objective || 'Create UI component',
+      initialCode: qList[0]?.initialHtml || '',
+      language: 'HTML/JS'
+    },
+    dsa: {
+      title: qList[2]?.title || 'Backend/DSA: Array Manipulation',
+      desc: qList[2]?.objective || 'Write a program to solve the given DSA problem.',
+      initialCode: qList[2]?.initialCode || 'function solution() {\n  // Write your code here\n}',
+      language: 'JavaScript/C++'
+    },
+    sql: {
+      title: qList[1]?.title || 'Database Query',
+      desc: qList[1]?.objective || 'Write an SQL query.',
+      initialCode: qList[1]?.initialCode || '-- Write your SQL query here\n',
+      language: 'SQL'
+    }
+  };
 
-export default function SectionC({ onComplete }) {
   const [activeTab, setActiveTab] = useState('frontend');
   const [timeLeft, setTimeLeft] = useState(DURATION_SECONDS);
   const [codeData, setCodeData] = useState({
@@ -32,20 +37,46 @@ export default function SectionC({ onComplete }) {
     dsa: CODING_PROBLEMS.dsa.initialCode,
     sql: CODING_PROBLEMS.sql.initialCode,
   });
+  const [consoleOutput, setConsoleOutput] = useState('> Ready to execute...');
+  const [isRunning, setIsRunning] = useState(false);
+  const [submitted, setSubmitted] = useState({ frontend: false, dsa: false, sql: false });
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      if (onComplete) onComplete();
+      if (onComplete) onComplete({ submitted });
       return;
     }
     const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft, onComplete]);
 
-  const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  const handleRun = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    setConsoleOutput('> Compiling...');
+    setTimeout(() => {
+      setConsoleOutput('> Compiling...\n> Running test cases...');
+      setTimeout(() => {
+        const passed = Math.floor(Math.random() * 3) + 2;
+        const total = passed + Math.floor(Math.random() * 2);
+        setConsoleOutput(
+          '> Compiling...\n> Running test cases...\n' +
+          Array.from({ length: passed }, (_, i) => '> Test Case ' + (i + 1) + ': Passed \u2713').join('\n') +
+          (total > passed ? '\n> Test Case ' + (passed + 1) + ': Failed \u2717 (hidden)' : '') +
+          '\n> ' + passed + '/' + total + ' test cases passed.'
+        );
+        setIsRunning(false);
+      }, 800);
+    }, 600);
+  };
+
+  const handleSubmit = () => {
+    setSubmitted(prev => ({ ...prev, [activeTab]: true }));
+    setConsoleOutput('> Submitting ' + activeTab + ' solution...\n> \u2713 Solution submitted successfully!');
+  };
+
+  const handleSubmitSection = () => {
+    if (onComplete) onComplete({ submitted });
   };
 
   const handleCodeChange = (e) => {
@@ -68,6 +99,12 @@ export default function SectionC({ onComplete }) {
             <Clock size={18} />
             <span>{formatTime(timeLeft)}</span>
           </div>
+          <button
+            onClick={handleSubmitSection}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-sm"
+          >
+            Submit Section →
+          </button>
         </div>
       </div>
 
@@ -86,23 +123,23 @@ export default function SectionC({ onComplete }) {
               <Layout size={18} /> Frontend
             </button>
             <button 
-              onClick={() => setActiveTab('dsa')}
-              className={`flex-1 py-3 text-sm font-semibold flex flex-col items-center gap-1 transition ${activeTab === 'dsa' ? 'bg-white text-purple-700 border-t-2 border-t-purple-600' : 'text-gray-500 hover:bg-gray-100 border-t-2 border-transparent'}`}
-            >
-              <Code size={18} /> DSA
-            </button>
-            <button 
               onClick={() => setActiveTab('sql')}
               className={`flex-1 py-3 text-sm font-semibold flex flex-col items-center gap-1 transition ${activeTab === 'sql' ? 'bg-white text-purple-700 border-t-2 border-t-purple-600' : 'text-gray-500 hover:bg-gray-100 border-t-2 border-transparent'}`}
             >
               <Database size={18} /> SQL
+            </button>
+            <button 
+              onClick={() => setActiveTab('dsa')}
+              className={`flex-1 py-3 text-sm font-semibold flex flex-col items-center gap-1 transition ${activeTab === 'dsa' ? 'bg-white text-purple-700 border-t-2 border-t-purple-600' : 'text-gray-500 hover:bg-gray-100 border-t-2 border-transparent'}`}
+            >
+              <Code size={18} /> DSA
             </button>
           </div>
 
           {/* Description */}
           <div className="flex-1 p-6 overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">{currentProb.title}</h3>
-            <div className="prose prose-sm text-gray-700">
+            <div className="prose prose-sm text-gray-700 whitespace-pre-wrap">
               <p>{currentProb.desc}</p>
             </div>
           </div>
@@ -119,11 +156,11 @@ export default function SectionC({ onComplete }) {
               <span className="ml-4">{currentProb.language} Environment</span>
             </div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 text-sm rounded transition">
-                <Play size={14} /> Run Code
+              <button onClick={handleRun} disabled={isRunning} className="flex items-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 text-sm rounded transition disabled:opacity-50">
+                <Play size={14} /> {isRunning ? 'Running...' : 'Run Code'}
               </button>
-              <button className="flex items-center gap-1 bg-green-600 hover:bg-green-500 text-white px-3 py-1 text-sm rounded shadow transition">
-                <Send size={14} /> Submit Solution
+              <button onClick={handleSubmit} className={'flex items-center gap-1 ' + (submitted[activeTab] ? 'bg-emerald-700' : 'bg-green-600 hover:bg-green-500') + ' text-white px-3 py-1 text-sm rounded shadow transition'}>
+                {submitted[activeTab] ? <><CheckCircle size={14} /> Submitted</> : <><Send size={14} /> Submit Solution</>}
               </button>
             </div>
           </div>
@@ -132,15 +169,15 @@ export default function SectionC({ onComplete }) {
           <textarea 
             value={codeData[activeTab]}
             onChange={handleCodeChange}
-            className="flex-1 bg-gray-900 text-green-400 font-mono p-4 focus:outline-none resize-none leading-relaxed"
+            className="flex-1 bg-gray-900 text-green-400 font-mono p-4 focus:outline-none resize-none leading-relaxed whitespace-pre"
             spellCheck="false"
           />
           
           {/* Console Output Mockup */}
           <div className="h-48 bg-black border-t border-gray-700 flex flex-col">
             <div className="bg-gray-800 text-gray-400 text-xs px-4 py-1 uppercase tracking-wider font-semibold">Console Output</div>
-            <div className="p-4 text-gray-500 font-mono text-sm flex-1 overflow-y-auto">
-              &gt; Ready to execute...
+            <div className="p-4 text-gray-500 font-mono text-sm flex-1 overflow-y-auto whitespace-pre-wrap">
+              {consoleOutput}
             </div>
           </div>
         </div>

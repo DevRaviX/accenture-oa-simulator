@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { RefreshCw, ArrowRightLeft, Check, Globe } from "lucide-react";
+import { RefreshCw, ArrowRightLeft, Check, Globe, SkipForward } from "lucide-react";
+import { formatTime } from "./utils.js";
 
 const GRID_SIZE = 8;
 const TOTAL_LEVELS = 3;
@@ -182,7 +183,7 @@ function generateLevels(count) {
   return levels;
 }
 
-const ALL_LEVELS = generateLevels(TOTAL_LEVELS);
+
 
 /* ── Rocket SVG (spaceship silhouette like in the screenshots) ── */
 const RocketIcon = ({ size = 36, className = "" }) => (
@@ -286,13 +287,15 @@ const Tile = memo(({ cell }) => {
 
 /* ── Main component ──────────────────────────────────── */
 export default function CognitiveGame({ onComplete }) {
+  const [allLevels] = useState(() => generateLevels(TOTAL_LEVELS));
   const [currentLevel, setCurrentLevel] = useState(0);
-  const [levelData, setLevelData] = useState(ALL_LEVELS[0]);
-  const [grid, setGrid] = useState(levelData.grid);
+  const [levelData, setLevelData] = useState(() => allLevels[0]);
+  const [grid, setGrid] = useState(() => allLevels[0].grid);
   const [selectedCell, setSelectedCell] = useState(null);
   const [animToken, setAnimToken] = useState(null);
   const [modal, setModal] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [successfulLevels, setSuccessfulLevels] = useState(0);
   const [toast, setToast] = useState(null);
   const [timeLeft, setTimeLeft] = useState(4 * 60);
 
@@ -380,12 +383,18 @@ export default function CognitiveGame({ onComplete }) {
     setAnimToken({ r: levelData.startRow, c: -1, dir: 0 });
   }, [animToken, levelData.startRow, timeLeft]);
 
-  const nextLevel = () => {
+  const nextLevel = (success = false) => {
+    let newScore = successfulLevels;
+    if (success === true) {
+      newScore += 1;
+      setSuccessfulLevels(newScore);
+    }
+
     if (currentLevel < TOTAL_LEVELS - 1) {
       const idx = currentLevel + 1;
       setCurrentLevel(idx);
-      setLevelData(ALL_LEVELS[idx]);
-      setGrid(ALL_LEVELS[idx].grid);
+      setLevelData(allLevels[idx]);
+      setGrid(allLevels[idx].grid);
       setAnimToken(null);
       setSelectedCell(null);
       setModal(false);
@@ -393,15 +402,21 @@ export default function CognitiveGame({ onComplete }) {
       setToast(null);
       setTimeLeft(4 * 60);
     } else {
-      if (onComplete) onComplete();
+      if (onComplete) onComplete({ levelsCompleted: newScore, totalLevels: TOTAL_LEVELS });
     }
   };
 
-  const fmt = (s) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  };
+  /* Keyboard shortcuts: R = rotate, F = flip/reverse, Enter = validate */
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'r' || e.key === 'R') rotateSelected();
+      if (e.key === 'f' || e.key === 'F') reverseSelected();
+      if (e.key === 'Enter') validatePath();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [rotateSelected, reverseSelected, validatePath]);
 
   const cellPct = 100 / GRID_SIZE;
 
@@ -511,7 +526,7 @@ export default function CognitiveGame({ onComplete }) {
                   Valid route – well done!
                 </h2>
                 <button
-                  onClick={nextLevel}
+                  onClick={() => nextLevel(true)}
                   className="bg-[#4b5563] text-white px-8 py-3 rounded font-bold hover:bg-gray-800 shadow-md"
                 >
                   CONTINUE
@@ -532,7 +547,7 @@ export default function CognitiveGame({ onComplete }) {
                 </h2>
                 <p className="text-gray-500 mb-6 text-center">You ran out of time for this question.</p>
                 <button
-                  onClick={nextLevel}
+                  onClick={() => nextLevel(false)}
                   className="bg-red-600 text-white px-8 py-3 rounded font-bold hover:bg-red-700 shadow-md"
                 >
                   {currentLevel < TOTAL_LEVELS - 1 ? "NEXT QUESTION" : "FINISH"}
@@ -547,7 +562,7 @@ export default function CognitiveGame({ onComplete }) {
           {/* Circular timer */}
           <div className={`w-[76px] h-[76px] rounded-full border-[5px] flex items-center justify-center transition-colors ${timeLeft <= 30 ? 'border-red-500' : 'border-[#3a3a3a]'}`}>
             <span className={`text-[22px] font-bold tabular-nums transition-colors ${timeLeft <= 30 ? 'text-red-500' : 'text-[#3a3a3a]'}`}>
-              {fmt(timeLeft)}
+              {formatTime(timeLeft)}
             </span>
           </div>
 
@@ -575,6 +590,15 @@ export default function CognitiveGame({ onComplete }) {
               <Check size={34} />
             </button>
           </div>
+
+          {/* Skip question */}
+          <button
+            onClick={() => nextLevel(false)}
+            title="Skip this question"
+            className="flex items-center gap-2 px-5 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 active:scale-95 transition font-semibold text-sm shadow-sm"
+          >
+            Skip <SkipForward size={18} />
+          </button>
         </div>
       </div>
 
